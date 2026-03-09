@@ -11,7 +11,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0F111A;
+            background-color: #030305;
             /* Deep slate background matching the app */
             color: #ffffff;
         }
@@ -73,7 +73,7 @@
             position: absolute;
             border-radius: 50%;
             filter: blur(100px);
-            opacity: 0.07;
+            opacity: 0.03;
             animation: orbFloat var(--d, 20s) ease-in-out infinite alternate;
         }
 
@@ -361,6 +361,78 @@
                 transform: translate(var(--hdx, 20px), var(--hdy, -50px)) scale(1);
             }
         }
+
+        /* ═══ PRISM PROTOTYPE ═══ */
+        .prism-stage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            width: clamp(300px, 90vw, 800px);
+            height: clamp(240px, 85vw, 400px);
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.6;
+        }
+
+        .prism-laser {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            width: 50%;
+            height: 3px;
+            background: #ffffff;
+            box-shadow: 0 0 15px 2px #ffffff, 0 0 30px #ffffff, 0 0 50px #ffffff;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .prism-spectrum {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 50%;
+            height: 300px;
+            background: linear-gradient(to bottom,
+                    rgba(0, 168, 255, 0) 0%,
+                    rgba(0, 168, 255, 1) 20%,
+                    rgba(0, 255, 136, 1) 40%,
+                    rgba(255, 238, 0, 1) 60%,
+                    rgba(255, 50, 50, 1) 80%,
+                    rgba(255, 50, 50, 0) 100%);
+            /* Triangle pointing right */
+            clip-path: polygon(100% 50%, 0 0, 0 100%);
+            transform: translateY(-50%);
+            z-index: 1;
+            filter: blur(8px) contrast(1.2) drop-shadow(0 0 40px rgba(255, 255, 255, 0.2));
+            opacity: 0.9;
+            mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 90%);
+            -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 90%);
+        }
+
+        .prism-star {
+            position: relative;
+            z-index: 3;
+            width: clamp(80px, 15vw, 120px);
+            height: clamp(80px, 15vw, 120px);
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 1)) drop-shadow(0 0 40px rgba(255, 255, 255, 0.6));
+            animation: starPulse 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes starPulse {
+            0% {
+                transform: scale(0.95);
+                filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
+            }
+
+            100% {
+                transform: scale(1.05);
+                filter: drop-shadow(0 0 35px rgba(255, 255, 255, 1)) drop-shadow(0 0 70px rgba(255, 255, 255, 0.8));
+            }
+        }
     </style>
 </head>
 
@@ -397,11 +469,17 @@
         <section
             class="text-center space-y-6 pt-16 md:pt-24 pb-12 relative min-h-[350px] flex flex-col items-center justify-center">
 
-            <!-- 3D Animated Logo BEHIND text -->
-            <div class="hero-logo-stage" id="heroLogoStage"
-                style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:0; width:clamp(240px, 85vw, 340px); height:clamp(240px, 85vw, 340px); opacity:0.35; pointer-events:none;">
-                <div class="hero-logo-cube" id="heroLogoCube" style="animation: heroHover 6s ease-in-out infinite;">
-                </div>
+            <!-- Prism Prototype Design BEHIND text -->
+            <div class="prism-stage">
+                <!-- Spectrum spreading out to the left -->
+                <div class="prism-spectrum"></div>
+                <!-- 4-pointed Star -->
+                <svg viewBox="0 0 100 100" class="prism-star">
+                    <path d="M50 0 C53 40 60 47 100 50 C60 53 53 60 50 100 C47 60 40 53 0 50 C40 47 47 40 50 0 Z"
+                        fill="#ffffff" />
+                </svg>
+                <!-- Laser beam coming from the right -->
+                <div class="prism-laser"></div>
             </div>
 
             <h1 class="text-5xl md:text-7xl font-extrabold gradient-text tracking-tight uppercase relative z-10 px-4">
@@ -475,8 +553,8 @@
                     <div
                         class="flex flex-col items-center gap-3 p-6 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-teal-500/50 transition-all duration-300 shadow-lg group">
                         <div
-                            class="w-16 h-16 rounded-3xl overflow-hidden shadow-lg group-hover:scale-110 transition-transform">
-                            <img src="gpt_logo.png" alt="ChatGPT" class="w-full h-full object-cover">
+                            class="w-16 h-16 rounded-full overflow-hidden shadow-lg group-hover:scale-110 transition-transform">
+                            <img src="gpt_logo_round.png" alt="ChatGPT" class="w-full h-full object-cover">
                         </div>
                         <div class="text-center">
                             <span class="block font-bold text-white tracking-wide">ChatGPT</span>
@@ -488,8 +566,8 @@
                     <div
                         class="flex flex-col items-center gap-3 p-6 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-orange-500/50 transition-all duration-300 shadow-lg group">
                         <div
-                            class="w-16 h-16 rounded-3xl overflow-hidden shadow-lg group-hover:scale-110 transition-transform">
-                            <img src="claude_logo.png" alt="Claude" class="w-full h-full object-cover">
+                            class="w-16 h-16 rounded-full overflow-hidden shadow-lg group-hover:scale-110 transition-transform">
+                            <img src="claude_logo_round.png" alt="Claude" class="w-full h-full object-cover">
                         </div>
                         <div class="text-center">
                             <span class="block font-bold text-white tracking-wide">Claude</span>
@@ -501,12 +579,25 @@
                     <div
                         class="flex flex-col items-center gap-3 p-6 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-blue-500/50 transition-all duration-300 shadow-lg group">
                         <div
-                            class="w-16 h-16 rounded-3xl overflow-hidden shadow-lg group-hover:scale-110 transition-transform">
-                            <img src="gemini_logo.png" alt="Gemini" class="w-full h-full object-cover">
+                            class="w-16 h-16 rounded-full overflow-hidden shadow-lg group-hover:scale-110 transition-transform">
+                            <img src="gemini_logo_round.png" alt="Gemini" class="w-full h-full object-cover">
                         </div>
                         <div class="text-center">
                             <span class="block font-bold text-white tracking-wide">Gemini</span>
                             <span class="block text-xs text-gray-400 uppercase font-semibold mt-1">Google</span>
+                        </div>
+                    </div>
+
+                    <!-- Grok -->
+                    <div
+                        class="flex flex-col items-center gap-3 p-6 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-indigo-400/50 transition-all duration-300 shadow-lg group">
+                        <div
+                            class="w-16 h-16 rounded-full overflow-hidden shadow-lg group-hover:scale-110 transition-transform">
+                            <img src="grok_logo_round.png" alt="Grok" class="w-full h-full object-cover">
+                        </div>
+                        <div class="text-center">
+                            <span class="block font-bold text-white tracking-wide">Grok</span>
+                            <span class="block text-xs text-gray-400 uppercase font-semibold mt-1">xAI</span>
                         </div>
                     </div>
 
@@ -520,19 +611,6 @@
                         <div class="text-center">
                             <span class="block font-bold text-white tracking-wide">Llama</span>
                             <span class="block text-xs text-gray-400 uppercase font-semibold mt-1">Meta</span>
-                        </div>
-                    </div>
-
-                    <!-- Grok -->
-                    <div
-                        class="flex flex-col items-center gap-3 p-6 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-indigo-400/50 transition-all duration-300 shadow-lg group">
-                        <div
-                            class="w-16 h-16 rounded-3xl overflow-hidden shadow-lg group-hover:scale-110 transition-transform">
-                            <img src="grok_logo.png" alt="Grok" class="w-full h-full object-cover">
-                        </div>
-                        <div class="text-center">
-                            <span class="block font-bold text-white tracking-wide">Grok</span>
-                            <span class="block text-xs text-gray-400 uppercase font-semibold mt-1">xAI</span>
                         </div>
                     </div>
 
@@ -588,7 +666,8 @@
 
                 <div class="glass-panel rounded-2xl overflow-hidden border border-white/10">
                     <!-- Table header -->
-                    <div class="grid grid-cols-5 bg-white/5 border-b border-white/10 text-xs font-bold uppercase tracking-widest">
+                    <div
+                        class="grid grid-cols-5 bg-white/5 border-b border-white/10 text-xs font-bold uppercase tracking-widest">
                         <div class="col-span-2 p-4 text-gray-400">Feature</div>
                         <div class="p-4 text-center text-gray-400">ChatHub</div>
                         <div class="p-4 text-center text-gray-400">Poe</div>
@@ -599,7 +678,8 @@
                     <div id="compare-rows"></div>
                 </div>
 
-                <p class="text-center text-gray-500 text-xs">✅ Available &nbsp;&nbsp; ❌ Not available &nbsp;&nbsp; 🔜 Coming soon</p>
+                <p class="text-center text-gray-500 text-xs">✅ Available &nbsp;&nbsp; ❌ Not available &nbsp;&nbsp; 🔜
+                    Coming soon</p>
             </div>
         </section>
 
