@@ -9,7 +9,7 @@ function getCorsHeaders(origin) {
   };
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const origin = req.headers.origin || '';
   const corsHeaders = getCorsHeaders(origin);
   Object.keys(corsHeaders).forEach(k => res.setHeader(k, corsHeaders[k]));
@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   }
   
   try {
-    return res.status(200).json({ success: true, message: "Hello from minimal serverless test!" });
+    return res.status(200).json({ success: true, message: "Hello from CommonJS minimal serverless test!" });
   } catch(e) {
     return res.status(500).json({ error: e.message, stack: e.stack });
   }
