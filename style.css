@@ -225,7 +225,7 @@ body {
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.03);
     border-left: 3px solid transparent;
-    max-height: 120px;
+    max-height: 160px;
     overflow-y: auto;
     flex-shrink: 0;
     position: relative;
@@ -1535,7 +1535,6 @@ textarea::placeholder {
 /* Mobile Responsiveness - V2 Side-by-Side UI Adapted */
 @media (max-width: 768px) {
     body {
-        zoom: 0.75;
         overflow-y: auto;
     }
 
@@ -1638,6 +1637,14 @@ textarea::placeholder {
     .table-center,
     .status-indicator {
         display: none !important;
+    }
+
+    /* Round badge above avatars */
+    .round-counter {
+        z-index: 60;
+        top: 2px;
+        background: rgba(15, 17, 26, 0.95);
+        border: 1px solid rgba(99, 102, 241, 0.5);
     }
 
     /* Wrapper becomes a top row for the 4 bots */
@@ -1793,8 +1800,9 @@ textarea::placeholder {
         box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
     }
 
+    /* 16px prevents Safari mobile auto-zoom on input focus */
     textarea {
-        font-size: 0.95rem;
+        font-size: 16px;
     }
 
     /* Hide the transcript button from the input bar since transcript is always visible now */
@@ -2744,6 +2752,14 @@ body.grid-layout .status-indicator {
     display: none !important;
 }
 
+/* Round badge above avatars */
+body.grid-layout .round-counter {
+    z-index: 60;
+    top: 2px;
+    background: rgba(15, 17, 26, 0.95);
+    border: 1px solid rgba(99, 102, 241, 0.5);
+}
+
 /* Wrapper becomes a top row for the 4 bots */
 body.grid-layout .roundtable-wrapper {
     display: flex;
@@ -2897,8 +2913,9 @@ body.grid-layout .input-area {
     box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
 }
 
+/* 16px prevents Safari mobile auto-zoom on focus */
 body.grid-layout textarea {
-    font-size: 0.95rem;
+    font-size: 16px;
 }
 
 /* Hide the transcript button from the input bar since transcript is always visible now */
