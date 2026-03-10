@@ -148,41 +148,44 @@ const SEAT_MODELS = {
     { id: 'openai/gpt-4o', label: 'GPT-4o', badge: 'DEFAULT' },
     { id: 'openai/gpt-4o-mini', label: 'GPT-4o Mini', badge: 'FAST' },
     { id: 'openai/o3-mini', label: 'o3 Mini', badge: 'REASON' },
-    { id: 'deepseek/deepseek-r1:free', label: 'DeepSeek R1', badge: 'FREE' },
+    { id: 'openai/gpt-4-turbo', label: 'GPT-4 Turbo', badge: 'ALT' },
   ],
   claude: [
     { id: 'anthropic/claude-3-5-sonnet-20241022', label: 'Sonnet 3.5', badge: 'DEFAULT' },
     { id: 'anthropic/claude-3-haiku-20240307', label: 'Haiku 3', badge: 'FAST' },
     { id: 'anthropic/claude-3-opus-20240229', label: 'Opus 3', badge: 'BEST' },
-    { id: 'qwen/qwq-32b:free', label: 'QwQ-32B', badge: 'FREE' },
+    { id: 'anthropic/claude-3-5-haiku-20241022', label: 'Haiku 3.5', badge: 'NEW' },
   ],
   gemini: [
     { id: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash', badge: 'DEFAULT' },
     { id: 'google/gemini-2.0-flash-exp:free', label: 'Gemini 2.0', badge: 'FREE' },
     { id: 'google/gemini-1.5-pro', label: 'Gemini 1.5 Pro', badge: 'PRO' },
-    { id: 'meta-llama/llama-4-maverick:free', label: 'Llama 4', badge: 'FREE' },
+    { id: 'google/gemini-2.5-pro-preview', label: 'Gemini 2.5 Pro', badge: 'BEST' },
   ],
   grok: [
     { id: 'x-ai/grok-3-mini', label: 'Grok 3 Mini', badge: 'DEFAULT' },
     { id: 'x-ai/grok-3', label: 'Grok 3', badge: 'LATEST' },
-    { id: 'mistralai/mistral-large-2411', label: 'Mistral Large', badge: 'ALT' },
-    { id: 'deepseek/deepseek-chat:free', label: 'DeepSeek V3', badge: 'FREE' },
+    { id: 'x-ai/grok-2-1212', label: 'Grok 2', badge: 'ALT' },
   ],
   llama: [
     { id: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B', badge: 'DEFAULT' },
     { id: 'meta-llama/llama-3.1-8b-instruct:free', label: 'Llama 3.1 8B', badge: 'FREE' },
+    { id: 'meta-llama/llama-4-maverick:free', label: 'Llama 4 Maverick', badge: 'NEW' },
   ],
   deepseek: [
     { id: 'deepseek/deepseek-chat', label: 'DeepSeek V3', badge: 'DEFAULT' },
     { id: 'deepseek/deepseek-r1', label: 'DeepSeek R1', badge: 'REASON' },
+    { id: 'deepseek/deepseek-r1:free', label: 'DeepSeek R1 Free', badge: 'FREE' },
   ],
   mistral: [
     { id: 'mistralai/mistral-large-2411', label: 'Mistral Large', badge: 'DEFAULT' },
     { id: 'mistralai/pixtral-12b', label: 'Pixtral 12B', badge: 'VISION' },
+    { id: 'mistralai/mistral-small-2501', label: 'Mistral Small', badge: 'FAST' },
   ],
   qwen: [
     { id: 'qwen/qwen-2.5-72b-instruct', label: 'Qwen 2.5 72B', badge: 'DEFAULT' },
     { id: 'qwen/qwen-2.5-coder-32b-instruct', label: 'Qwen Coder', badge: 'CODE' },
+    { id: 'qwen/qwq-32b:free', label: 'QwQ-32B', badge: 'FREE' },
   ],
 };
 
@@ -312,8 +315,8 @@ const SESSION = {
 const FLAGS_KEY = 'llm4_features';
 let FLAGS = {
   consensusPanel: true,
-  exportShare: false,
-  pause: false,
+  exportShare: true,
+  pause: true,
   voiceTTS: false,
   voiceSTT: false,
   vision: false,
@@ -535,9 +538,6 @@ function handleKeyDown(e) {
 function openSettings() {
   // Populate feature checkboxes from current FLAGS
   const map = {
-    'flag-consensus-panel': 'consensusPanel',
-    'flag-export': 'exportShare',
-    'flag-pause': 'pause',
     'flag-voice-tts': 'voiceTTS',
     'flag-voice-stt': 'voiceSTT',
     'flag-vision': 'vision',
@@ -597,9 +597,8 @@ function saveSettings() {
     elements.apiKeyInput.placeholder = '••••••••••••••••  (saved)';
   }
 
-  /* Provider */
-  const provSelect = document.getElementById('provider-select');
-  if (provSelect) SESSION.provider = provSelect.value;
+  /* Provider — locked to OpenRouter */
+  SESSION.provider = 'openrouter';
   const customUrl = document.getElementById('custom-url-input');
   if (customUrl) SESSION.customUrl = customUrl.value.trim();
 
@@ -608,18 +607,16 @@ function saveSettings() {
     localStorage.setItem('web_search_enabled', webSearchEnabled);
   }
 
-  /* Feature flags — fine to persist */
-  FLAGS.consensusPanel = !!document.getElementById('flag-consensus-panel')?.checked;
-  FLAGS.exportShare = !!document.getElementById('flag-export')?.checked;
-  FLAGS.pause = !!document.getElementById('flag-pause')?.checked;
+  /* Feature flags */
+  FLAGS.consensusPanel = true;  // always on
+  FLAGS.exportShare = true;     // always on
+  FLAGS.pause = true;           // always on
   FLAGS.voiceTTS = !!document.getElementById('flag-voice-tts')?.checked;
   FLAGS.voiceSTT = !!document.getElementById('flag-voice-stt')?.checked;
   FLAGS.vision = !!document.getElementById('flag-vision')?.checked;
 
-  const selectedCount = parseInt(document.getElementById('seat-count-select')?.value || '4');
-  if (selectedCount >= 2 && selectedCount <= 8) {
-    FLAGS.seatCount = selectedCount;
-  }
+  /* Seat count — locked to 4 */
+  FLAGS.seatCount = 4;
 
   localStorage.setItem(FLAGS_KEY, JSON.stringify(FLAGS));
 
@@ -644,20 +641,18 @@ function loadFeatureFlags() {
     }
   } catch (e) { /* use defaults */ }
 
-  // Ensure seatCount has a valid fallback
-  if (!SESSION.seatCount) {
-    SESSION.seatCount = FLAGS.seatCount || 4;
-  }
-  AGENT_ORDER = AGENT_ORDER_FULL.slice(0, SESSION.seatCount);
+  // Force always-on features (no longer in settings)
+  FLAGS.consensusPanel = true;
+  FLAGS.exportShare = true;
+  FLAGS.pause = true;
+
+  // Force 4 seats — expanded seat counts coming soon
+  SESSION.seatCount = 4;
+  FLAGS.seatCount = 4;
+  AGENT_ORDER = AGENT_ORDER_FULL.slice(0, 4);
   SESSION.featVoiceTTS = FLAGS.voiceTTS;
   SESSION.featVoiceSTT = FLAGS.voiceSTT;
   SESSION.featVision = FLAGS.vision;
-  SESSION.seatCount = FLAGS.seatCount || 4;
-
-  // On mobile, always default to 4 seats — 8 is unusable on small screens
-  if (window.innerWidth <= 768 && SESSION.seatCount > 4) {
-    SESSION.seatCount = 4;
-  }
 }
 
 function applyFeatureFlags() {
@@ -728,6 +723,12 @@ function appendToTranscript(role, text, modelKey = null, opts = {}) {
     messageReactions.set(msgId, { up: 0, down: 0 });
     html = `<div class="transcript-msg ${modelKey}" onclick="this.classList.toggle('expanded')" id="${msgId}">${copyBtnHtml}<strong>${aiName}</strong>${timeBadge} ${parsedText}<div class="react-bar"><button class="react-btn" onclick="event.stopPropagation();reactToMsg('${msgId}','up',this)">👍 <span>0</span></button><button class="react-btn" onclick="event.stopPropagation();reactToMsg('${msgId}','down',this)">👎 <span>0</span></button></div></div>`;
   }
+
+  // Hide the welcome screen the first time any message is appended
+  // Use querySelector fallback in case the id gets stripped by remote commits
+  const welcome = document.getElementById('transcript-welcome') ||
+                  document.querySelector('#transcript-container .transcript-msg.system');
+  if (welcome) welcome.style.display = 'none';
 
   elements.transcriptContainer.insertAdjacentHTML('beforeend', html);
   elements.transcriptContainer.scrollTo({ top: elements.transcriptContainer.scrollHeight, behavior: 'smooth' });
@@ -1213,15 +1214,28 @@ function reactToMsg(msgId, type, btn) {
   const bar = btn.closest('.react-bar');
   const upBtn = bar.querySelector('.react-btn:first-child');
   const downBtn = bar.querySelector('.react-btn:last-child');
-  const alreadyVoted = btn.classList.contains('voted-up') || btn.classList.contains('voted-down');
-  if (alreadyVoted) {
-    // Toggle off
-    if (type === 'up') { r.up = Math.max(0, r.up - 1); btn.classList.remove('voted-up'); }
-    else { r.down = Math.max(0, r.down - 1); btn.classList.remove('voted-down'); }
+
+  const isUpVoted = upBtn.classList.contains('voted-up');
+  const isDownVoted = downBtn.classList.contains('voted-down');
+
+  if (type === 'up') {
+    if (isUpVoted) {
+      r.up = Math.max(0, r.up - 1);
+      upBtn.classList.remove('voted-up');
+    } else {
+      if (isDownVoted) { r.down = Math.max(0, r.down - 1); downBtn.classList.remove('voted-down'); }
+      r.up++;
+      upBtn.classList.add('voted-up');
+    }
   } else {
-    // Remove opposite vote if any
-    if (type === 'up') { upBtn.classList.add('voted-up'); downBtn.classList.remove('voted-down'); if (downBtn.classList.contains('voted-down')) r.down = Math.max(0, r.down - 1); r.up++; }
-    else { downBtn.classList.add('voted-down'); upBtn.classList.remove('voted-up'); if (upBtn.classList.contains('voted-up')) r.up = Math.max(0, r.up - 1); r.down++; }
+    if (isDownVoted) {
+      r.down = Math.max(0, r.down - 1);
+      downBtn.classList.remove('voted-down');
+    } else {
+      if (isUpVoted) { r.up = Math.max(0, r.up - 1); upBtn.classList.remove('voted-up'); }
+      r.down++;
+      downBtn.classList.add('voted-down');
+    }
   }
   messageReactions.set(msgId, r);
   upBtn.querySelector('span').textContent = r.up || 0;
@@ -1360,6 +1374,19 @@ function lockControls(locked) {
    ════════════════════════════════════════════════════════════════ */
 function clearChat() {
   if (!confirm('Clear the table and start over?')) return;
+  // Stop any running debate first
+  shouldStop = true; isPaused = false;
+  isGenerating = false;
+  if (placeholderInterval) { clearInterval(placeholderInterval); placeholderInterval = null; }
+  elements.autopilotToggle.checked = false;
+  elements.stopBtn.style.display = 'none';
+  const pauseBtn = document.getElementById('pause-btn');
+  if (pauseBtn) pauseBtn.style.display = 'none';
+  elements.sendBtn.disabled = false;
+  elements.messageInput.disabled = false;
+  elements.messageInput.placeholder = 'Address the roundtable...';
+  lockControls(false);
+
   chatHistory = []; roundNumber = 0; pendingImage = null;
   msgIdCounter = 0; messageReactions.clear();
   hideAllBubbles(); hideConsensus();
@@ -1496,10 +1523,32 @@ function toggleSeatMenu(seatKey, anchorEl) {
   const rect = anchorEl.getBoundingClientRect();
   const menuW = 260;
   let left = rect.left + rect.width / 2 - menuW / 2;
-  let top = rect.bottom + 8 + window.scrollY;
   left = Math.max(8, Math.min(left, window.innerWidth - menuW - 8));
+
+  // Flip menu above the seat if it would go below the viewport
+  const estimatedMenuH = 380;
+  const spaceBelow = window.innerHeight - rect.bottom;
+  let top;
+  if (spaceBelow < estimatedMenuH && rect.top > estimatedMenuH) {
+    // Open above the seat
+    top = rect.top - estimatedMenuH + window.scrollY;
+  } else {
+    // Open below the seat (default)
+    top = rect.bottom + 8 + window.scrollY;
+  }
   menu.style.left = left + 'px';
   menu.style.top = top + 'px';
+
+  // Also clamp to viewport bottom in case neither direction works perfectly
+  requestAnimationFrame(() => {
+    const menuRect = menu.getBoundingClientRect();
+    if (menuRect.bottom > window.innerHeight) {
+      menu.style.top = (window.innerHeight - menuRect.height - 8 + window.scrollY) + 'px';
+    }
+    if (menuRect.top < 0) {
+      menu.style.top = (8 + window.scrollY) + 'px';
+    }
+  });
 
   activeSeatMenu = menu;
   searchInput.focus();
@@ -1817,5 +1866,15 @@ document.addEventListener('DOMContentLoaded', () => {
   Voice.init();
   Vision.init();
   applyFeatureFlags();
+
+  /* Prevent Ctrl+Scroll and Ctrl+/- zoom from breaking layout */
+  document.addEventListener('wheel', e => {
+    if (e.ctrlKey) e.preventDefault();
+  }, { passive: false });
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '-' || e.key === '=' || e.key === '0')) {
+      e.preventDefault();
+    }
+  });
 });
 

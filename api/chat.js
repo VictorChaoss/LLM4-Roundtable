@@ -137,6 +137,11 @@ const PROVIDER_CONFIG = {
     keyEnv: 'KIMI_API_KEY',
     defaultModel: 'moonshot-v1-8k',
   },
+  'x-ai': {
+    url: 'https://api.x.ai/v1/chat/completions',
+    keyEnv: 'XAI_API_KEY',
+    defaultModel: 'grok-3-mini',
+  },
   custom: {
     urlEnv: 'CUSTOM_API_URL',
     keyEnv: 'CUSTOM_API_KEY',
@@ -191,6 +196,15 @@ export default async function handler(req, res) {
     });
   }
 
+  // Enhanced rate limiting — Anon AI
+  const enhanced = checkEnhancedRateLimit(ip);
+  if (!enhanced.allowed) {
+    return res.status(429).set(corsHeaders).json({
+      error: enhanced.reason,
+      retryAfter: enhanced.retryAfter,
+    });
+  }
+
   // ── Parse + validate body ────────────────────────────────────
   let body;
   try {
@@ -199,7 +213,7 @@ export default async function handler(req, res) {
     return res.status(400).set(corsHeaders).json({ error: 'Invalid JSON' });
   }
 
-  const { provider: providerId, model, messages } = body;
+  const { provider: providerId, model, messages, plugins, apiKey: userKey } = body;
 
   if (!providerId || !messages || !Array.isArray(messages)) {
     return res.status(400).set(corsHeaders).json({ error: 'Missing required fields: provider, messages' });
@@ -218,9 +232,16 @@ export default async function handler(req, res) {
     return res.status(400).set(corsHeaders).json({ error: 'No valid messages' });
   }
 
+  // Abuse detection — Anon AI
+  const abuse = detectAbuse(ip, safeMessages);
+  if (abuse.abuse) {
+    return res.status(400).set(corsHeaders).json({ error: abuse.reason });
+  }
+
   // ── Resolve provider settings ────────────────────────────────
   const cfg = PROVIDER_CONFIG[providerId];
-  const apiKey = process.env[cfg.keyEnv] || null;
+  // Priority: User Key (from body) > Admin Key (from Env)
+  const apiKey = userKey || process.env[cfg.keyEnv] || null;
   const apiUrl = cfg.urlEnv ? process.env[cfg.urlEnv] : cfg.url;
   const apiModel = model || (cfg.modelEnv ? process.env[cfg.modelEnv] : cfg.defaultModel);
 
@@ -248,8 +269,13 @@ export default async function handler(req, res) {
     max_tokens: Math.min(body.max_tokens || MAX_TOKENS_PER_REQUEST, MAX_TOKENS_PER_REQUEST),
   };
 
+  if (plugins) {
+    upstreamBody.plugins = plugins;
+  }
+
   // ── Forward to provider ──────────────────────────────────────
   let upstream;
+  const start = Date.now();
   try {
     upstream = await fetch(apiUrl, {
       method: 'POST',
@@ -270,6 +296,9 @@ export default async function handler(req, res) {
 
   // ── Record successful request + return ───────────────────────
   recordRequest(ip);
+  recordEnhancedRequest(ip); // Anon AI addition
+
+  serverLog(ip, providerId, apiModel, JSON.stringify(safeMessages).length, upstream.status, Date.now() - start);
 
   // Strip provider metadata before returning — only send what browser needs
   return res.status(200).set(corsHeaders).json({
