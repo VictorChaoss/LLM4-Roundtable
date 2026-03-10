@@ -1647,19 +1647,30 @@ textarea::placeholder {
         border: 1px solid rgba(99, 102, 241, 0.5);
     }
 
-    /* Wrapper becomes a top row for the 4 bots */
+    /* Wrapper becomes a scrollable top row for all bots */
     .roundtable-wrapper {
         display: flex;
         flex-direction: row;
         justify-content: center;
         align-items: center;
         width: 100%;
-        height: 120px;
-        padding: 0.5rem 0;
-        gap: 1.5rem;
+        height: 90px;
+        padding: 0.25rem 0.5rem;
+        gap: 0.75rem;
         margin: 0;
         transform: none;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        /* Firefox */
     }
+
+    .roundtable-wrapper::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Chrome/Safari */
 
     /* Format AI Seats as small vertical blocks in a row */
     .ai-seat {
@@ -1676,6 +1687,8 @@ textarea::placeholder {
         bottom: auto !important;
         left: auto !important;
         right: auto !important;
+        flex-shrink: 0;
+        /* prevent squishing when many seats */
     }
 
     /* Enhanced lighting up effect for active speaker on mobile */
@@ -1713,16 +1726,14 @@ textarea::placeholder {
     }
 
     .avatar {
-        width: 48px;
-        height: 48px;
-        font-size: 1.5rem;
-        /* Ensure icons have a baseline size */
-        border-radius: 14px;
-        margin-bottom: 4px;
+        width: 42px;
+        height: 42px;
+        font-size: 1.2rem;
+        border-radius: 12px;
+        margin-bottom: 2px;
         border: 2px solid transparent;
         transition: border-color 0.3s, box-shadow 0.3s;
         display: flex;
-        /* keep icon centered */
         justify-content: center;
         align-items: center;
     }
